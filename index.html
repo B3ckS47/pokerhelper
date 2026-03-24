@@ -53,7 +53,7 @@
     box-shadow: 0 2px 16px rgba(26,58,92,0.3);
   }
   .nav-logo {
-    font-family: 'Archivo Black', sans-serif; font-weight: 900; font-size: 19px;
+    font-family: 'Archivo Black', sans-serif; font-weight: 900; font-size: 14px;
     color: #fff; letter-spacing: 0.03em; display: flex; align-items: center; gap: 8px;
   }
   .nav-tabs {
@@ -354,7 +354,7 @@
 <body>
 
 <nav>
-  <div class="nav-logo">♠ Pokerhelper</div>
+  <div class="nav-logo">Pokerhelper</div>
   <div class="nav-tabs">
     <button class="nav-tab active" onclick="showPage('selector')">Spiel</button>
     <button class="nav-tab" onclick="showPage('bingo')">Bingo</button>
@@ -377,7 +377,7 @@
 <!-- CASE OVERLAY -->
 <div class="case-container" id="caseOverlay">
   <div class="case-title">Wähle dein Schicksal</div>
-  <div class="case-tagline">Nur eine Variante wird heute gespielt…</div>
+  <div class="case-tagline">Was wird als nächstes gespielt…</div>
   <div class="case-track-outer">
     <div class="case-indicator"></div>
     <div class="case-track-wrapper">
@@ -387,9 +387,9 @@
   <div class="case-result hidden" id="caseResult">
     <img id="caseResultIcon" class="case-result-icon" src="" alt="">
     <div class="case-result-name" id="caseResultName"></div>
-    <div class="case-result-sub">Heute Abend wird gespielt!</div>
+    <div class="case-result-sub">Die Wahl ist getroffen!</div>
     <div class="case-result-actions">
-      <button class="btn btn-primary" onclick="closeCase()">Los geht's! 🃏</button>
+      <button class="btn btn-primary" onclick="closeCase()">Los geht's!</button>
       <button class="btn btn-sm" onclick="openCase()" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2);border-radius:12px;font-family:'Archivo Black',sans-serif;font-weight:800;padding:8px 16px;cursor:pointer">Nochmal</button>
     </div>
   </div>
@@ -484,7 +484,7 @@ const GAMES = [
   { id: 'short',   name: 'Short Deck',        img: 'Shortdeck.png'      },
   { id: 'bingo',   name: 'Poker Bingo',       img: 'Pokerbingo.png'     },
   { id: 'draft',   name: 'Draft',             img: 'Draft.png'          },
-  { id: 'river',   name: "Red River Hold'em", img: 'Redriverholdem.png' },
+  { id: 'river',   name: "Red River", img: 'Redriverholdem.png' },
 ];
 
 let selectedGames = new Set(GAMES.map(g => g.id));
