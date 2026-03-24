@@ -1,0 +1,1245 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Poker Night</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #c9a84c;
+    --gold-light: #f0d080;
+    --gold-dark: #8a6820;
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a28;
+    --surface3: #22223a;
+    --text: #e8e0d0;
+    --text-muted: #7a7060;
+    --red: #c0392b;
+    --green: #27ae60;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'Crimson Text', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(201,168,76,0.04) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, rgba(192,57,43,0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: rgba(10,10,15,0.95);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    height: 56px;
+    backdrop-filter: blur(10px);
+  }
+
+  .nav-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    color: var(--gold);
+    letter-spacing: 0.05em;
+  }
+
+  .nav-tabs {
+    display: flex;
+    gap: 4px;
+  }
+
+  .nav-tab {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Crimson Text', serif;
+    font-size: 13px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .nav-tab.active {
+    color: var(--gold);
+    background: rgba(201,168,76,0.1);
+  }
+
+  /* PAGES */
+  .page {
+    display: none;
+    padding: 72px 16px 32px;
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+  .page.active { display: block; }
+
+  /* SECTION TITLE */
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--gold);
+    margin-bottom: 4px;
+    letter-spacing: 0.02em;
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-bottom: 24px;
+    font-style: italic;
+  }
+
+  /* CARD COMPONENT */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  /* BUTTON */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.03em;
+  }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #0a0a0f;
+    font-weight: 700;
+  }
+  .btn-gold:hover { filter: brightness(1.1); transform: translateY(-1px); }
+  .btn-gold:active { transform: translateY(0); }
+
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-sm { padding: 8px 16px; font-size: 13px; }
+  .btn-full { width: 100%; }
+
+  /* INPUT */
+  input, select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-family: 'Crimson Text', serif;
+    font-size: 16px;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--gold); }
+  label { font-size: 14px; color: var(--text-muted); margin-bottom: 6px; display: block; }
+
+  /* === GAME SELECTOR === */
+  .game-list { margin-bottom: 20px; }
+
+  .game-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    margin-bottom: 8px;
+    background: var(--surface2);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .game-option:hover { border-color: var(--gold); }
+  .game-option.active { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+
+  .game-checkbox {
+    width: 20px; height: 20px;
+    border: 2px solid var(--text-muted);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .game-option.active .game-checkbox {
+    background: var(--gold);
+    border-color: var(--gold);
+  }
+  .game-checkbox::after {
+    content: '✓';
+    color: #0a0a0f;
+    font-size: 12px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .game-option.active .game-checkbox::after { opacity: 1; }
+
+  .game-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--text);
+  }
+
+  /* CS:GO CASE ANIMATION */
+  .case-container {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
+  .case-container.active { display: flex; }
+
+  .case-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    margin-bottom: 32px;
+    text-align: center;
+  }
+
+  .case-track-wrapper {
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+    position: relative;
+    padding: 0 16px;
+  }
+
+  .case-track-wrapper::before,
+  .case-track-wrapper::after {
+    content: '';
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 80px;
+    z-index: 10;
+    pointer-events: none;
+  }
+  .case-track-wrapper::before {
+    left: 16px;
+    background: linear-gradient(to right, rgba(0,0,0,0.9), transparent);
+  }
+  .case-track-wrapper::after {
+    right: 16px;
+    background: linear-gradient(to left, rgba(0,0,0,0.9), transparent);
+  }
+
+  /* Center indicator */
+  .case-indicator {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    transform: translateX(-50%);
+    z-index: 11;
+    box-shadow: 0 0 12px var(--gold);
+  }
+  .case-indicator::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-top-color: var(--gold);
+  }
+  .case-indicator::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 8px solid transparent;
+    border-bottom-color: var(--gold);
+  }
+
+  .case-track {
+    display: flex;
+    gap: 8px;
+    transition: transform 0s;
+    will-change: transform;
+    padding: 8px 0;
+  }
+
+  .case-item {
+    flex-shrink: 0;
+    width: 130px;
+    height: 90px;
+    background: var(--surface2);
+    border: 2px solid var(--surface3);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 8px;
+  }
+
+  .case-item-icon { display:flex; align-items:center; justify-content:center; }
+  .case-item-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 10px;
+    text-align: center;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .case-item.highlight {
+    border-color: var(--gold);
+    background: rgba(201,168,76,0.15);
+    box-shadow: 0 0 20px rgba(201,168,76,0.3);
+  }
+
+  .case-result {
+    margin-top: 32px;
+    text-align: center;
+    animation: fadeIn 0.5s ease;
+  }
+
+  .case-result-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .case-result-subtitle {
+    font-size: 16px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 24px;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* === BINGO === */
+  .bingo-controls { margin-bottom: 20px; }
+
+  .bingo-card {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+  }
+
+  .bingo-cell {
+    aspect-ratio: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+    padding: 2px;
+  }
+
+  .bingo-cell:active { transform: scale(0.95); }
+
+  .bingo-cell.checked {
+    background: rgba(201,168,76,0.2);
+    border-color: var(--gold);
+  }
+
+  .bingo-cell.checked::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--gold);
+    background: rgba(10,10,15,0.75);
+    font-family: 'Playfair Display', serif;
+    font-weight: 900;
+  }
+
+  .cell-suit {
+    font-size: 20px;
+    line-height: 1;
+  }
+  .cell-value {
+    font-size: 11px;
+    font-family: 'Playfair Display', serif;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.1;
+  }
+
+  .cell-red { color: #e74c3c; }
+  .cell-black { color: var(--text); }
+
+  .bingo-header {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+  .bingo-header-cell {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  .bingo-win {
+    display: none;
+    text-align: center;
+    padding: 20px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    margin-bottom: 16px;
+  }
+  .bingo-win.active { display: block; }
+  .bingo-win-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 32px;
+    color: var(--gold);
+  }
+
+  /* === MYSTERY BOUNTY === */
+  .mb-setup { }
+
+  .mb-envelopes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .mb-envelope {
+    aspect-ratio: 0.85;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    font-size: 36px;
+  }
+
+  .mb-envelope:not(.opened):hover {
+    border-color: var(--gold);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(201,168,76,0.2);
+  }
+
+  .mb-envelope:not(.opened):active { transform: scale(0.95) translateY(0); }
+
+  .mb-envelope.opened {
+    cursor: default;
+    border-color: var(--surface3);
+  }
+
+  .mb-envelope-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+
+  .mb-envelope-amount {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: var(--gold);
+    font-weight: 700;
+    text-align: center;
+    padding: 0 4px;
+    line-height: 1.2;
+  }
+
+  .mb-envelope .env-icon { transition: all 0.3s; }
+  .mb-envelope.opened .env-icon { opacity: 0.3; font-size: 24px; }
+
+  .mb-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .mb-stat {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+
+  .mb-stat-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    color: var(--gold);
+    display: block;
+  }
+
+  .mb-stat-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .mb-amounts-list {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 16px;
+  }
+
+  .mb-amount-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    align-items: center;
+  }
+
+  .mb-amount-item input { flex: 1; }
+
+  .mb-amount-remove {
+    background: none;
+    border: 1px solid rgba(192,57,43,0.4);
+    color: var(--red);
+    border-radius: 6px;
+    width: 32px;
+    height: 38px;
+    cursor: pointer;
+    font-size: 16px;
+    flex-shrink: 0;
+    transition: all 0.2s;
+  }
+  .mb-amount-remove:hover { background: rgba(192,57,43,0.1); }
+
+  /* OPEN ANIMATION */
+  @keyframes envelopeOpen {
+    0% { transform: scale(1); }
+    30% { transform: scale(1.1) rotate(-2deg); }
+    60% { transform: scale(1.05) rotate(1deg); }
+    100% { transform: scale(1); }
+  }
+  .mb-envelope.opening { animation: envelopeOpen 0.5s ease; }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 20px 0;
+  }
+
+  .form-group { margin-bottom: 16px; }
+
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+
+  /* Toggle pills */
+  .toggle-group {
+    display: flex;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .toggle-pill {
+    flex: 1;
+    padding: 10px;
+    text-align: center;
+    cursor: pointer;
+    font-family: 'Crimson Text', serif;
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: all 0.2s;
+    border: none;
+    background: none;
+  }
+
+  .toggle-pill.active {
+    background: var(--gold);
+    color: #0a0a0f;
+    font-weight: 600;
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin-bottom: 16px;
+  }
+  .alert-info {
+    background: rgba(201,168,76,0.08);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+  }
+  .alert-error {
+    background: rgba(192,57,43,0.08);
+    border: 1px solid rgba(192,57,43,0.3);
+    color: #e74c3c;
+  }
+
+  .hidden { display: none !important; }
+
+  /* Scroll helpers */
+  .scroll-anchor { scroll-margin-top: 70px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">♠ Poker Night</div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage('selector')">Spiel</button>
+    <button class="nav-tab" onclick="showPage('bingo')">Bingo</button>
+    <button class="nav-tab" onclick="showPage('bounty')">Bounty</button>
+  </div>
+</nav>
+
+<!-- ═══════════════ PAGE: GAME SELECTOR ═══════════════ -->
+<div id="page-selector" class="page active">
+  <div class="section-title">Spielauswahl</div>
+  <div class="section-sub">Welche Varianten sind heute dabei?</div>
+
+  <div class="card">
+    <div class="game-list" id="gameList"></div>
+    <button class="btn btn-gold btn-full" onclick="openCase()" style="margin-top:8px">
+      🎰 Zufällig auswählen
+    </button>
+  </div>
+</div>
+
+<!-- CS:GO CASE OVERLAY -->
+<div class="case-container" id="caseOverlay">
+  <div class="case-title">Wähle dein Schicksal...</div>
+
+  <div style="position:relative; width:100%; max-width:500px; padding:0 16px;">
+    <div class="case-indicator"></div>
+    <div class="case-track-wrapper">
+      <div class="case-track" id="caseTrack"></div>
+    </div>
+  </div>
+
+  <div class="case-result hidden" id="caseResult">
+    <div class="case-result-name" id="caseResultName"></div>
+    <div class="case-result-subtitle">Heute Abend wird gespielt!</div>
+    <div style="display:flex; gap:12px; justify-content:center; margin-top:8px;">
+      <button class="btn btn-gold" onclick="closeCase()">Los geht's! 🃏</button>
+      <button class="btn btn-outline btn-sm" onclick="openCase()">Nochmal</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PAGE: BINGO ═══════════════ -->
+<div id="page-bingo" class="page">
+  <div class="section-title">Poker Bingo</div>
+  <div class="section-sub">Neue Karte generieren und Felder abhaken</div>
+
+  <div class="bingo-win" id="bingoWin">
+    <div class="bingo-win-text">🎉 BINGO! 🎉</div>
+    <div style="font-style:italic; color:var(--text-muted); margin-top:4px;">Fünf in einer Reihe!</div>
+  </div>
+
+  <div class="bingo-header">
+    <div class="bingo-header-cell">B</div>
+    <div class="bingo-header-cell">I</div>
+    <div class="bingo-header-cell">N</div>
+    <div class="bingo-header-cell">G</div>
+    <div class="bingo-header-cell">O</div>
+  </div>
+
+  <div class="bingo-card" id="bingoGrid"></div>
+
+  <button class="btn btn-gold btn-full" onclick="generateBingo()" style="margin-top:4px">
+    🔀 Neue Karte
+  </button>
+</div>
+
+
+<!-- ═══════════════ PAGE: MYSTERY BOUNTY ═══════════════ -->
+<div id="page-bounty" class="page">
+  <div class="section-title">Mystery Bounty</div>
+  <div class="section-sub">Umschläge, Beträge, Spannung.</div>
+
+  <!-- SETUP PANEL -->
+  <div id="bountySetup">
+    <div class="card">
+      <div class="form-group">
+        <label>Anzahl Umschläge</label>
+        <input type="number" id="envCount" value="6" min="2" max="24" placeholder="z.B. 6">
+      </div>
+
+      <div class="form-group">
+        <label>Betrags-Modus</label>
+        <div class="toggle-group">
+          <button class="toggle-pill active" id="pillAuto" onclick="setMode('auto')">Automatisch</button>
+          <button class="toggle-pill" id="pillManual" onclick="setMode('manual')">Manuell</button>
+        </div>
+      </div>
+
+      <!-- AUTO MODE -->
+      <div id="autoMode">
+        <div class="row">
+          <div class="form-group">
+            <label>Gesamtbetrag (€)</label>
+            <input type="number" id="totalAmount" value="100" min="1" placeholder="100">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label>Min. Betrag (€)</label>
+            <input type="number" id="minAmount" value="5" min="0" placeholder="5">
+          </div>
+          <div class="form-group">
+            <label>Max. Betrag (€)</label>
+            <input type="number" id="maxAmount" value="30" min="1" placeholder="30">
+          </div>
+        </div>
+      </div>
+
+      <!-- MANUAL MODE -->
+      <div id="manualMode" class="hidden">
+        <label style="margin-bottom:10px">Beträge eingeben (€)</label>
+        <div class="mb-amounts-list" id="amountsList"></div>
+        <button class="btn btn-outline btn-sm" onclick="addAmountField()">+ Betrag hinzufügen</button>
+      </div>
+    </div>
+
+    <div id="bountyError" class="alert alert-error hidden"></div>
+
+    <button class="btn btn-gold btn-full" onclick="startBounty()">
+      ✉️ Umschläge erstellen
+    </button>
+  </div>
+
+  <!-- GAME PANEL -->
+  <div id="bountyGame" class="hidden">
+    <div class="mb-stats">
+      <div class="mb-stat">
+        <span class="mb-stat-value" id="mbRemaining">-</span>
+        <span class="mb-stat-label">Noch zu vergeben</span>
+      </div>
+      <div class="mb-stat">
+        <span class="mb-stat-value" id="mbOpened">0</span>
+        <span class="mb-stat-label">Geöffnet</span>
+      </div>
+    </div>
+
+    <div class="mb-envelopes" id="envGrid"></div>
+
+    <button class="btn btn-outline btn-full" onclick="resetBounty()">
+      ↺ Neu starten
+    </button>
+  </div>
+</div>
+
+
+<script>
+// ══════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-tab')[['selector','bingo','bounty'].indexOf(id)].classList.add('active');
+}
+
+// ══════════════════════════════════════
+// GAME SELECTOR
+// ══════════════════════════════════════
+
+// SVG Icons for each game variant
+const ICONS = {
+  // Stand Up Poker: a person standing at a table with cards
+  standup: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Table -->
+    <rect x="6" y="30" width="32" height="5" rx="2.5" fill="#c9a84c" opacity="0.85"/>
+    <rect x="10" y="35" width="3" height="7" rx="1.5" fill="#c9a84c" opacity="0.5"/>
+    <rect x="31" y="35" width="3" height="7" rx="1.5" fill="#c9a84c" opacity="0.5"/>
+    <!-- Cards on table -->
+    <rect x="14" y="24" width="7" height="9" rx="1.2" fill="#1a1a28" stroke="#c9a84c" stroke-width="1"/>
+    <text x="17.5" y="31" text-anchor="middle" font-size="5" fill="#e74c3c" font-family="serif">♥</text>
+    <rect x="23" y="24" width="7" height="9" rx="1.2" fill="#1a1a28" stroke="#c9a84c" stroke-width="1" transform="rotate(-8 26.5 28.5)"/>
+    <text x="26.5" y="31" text-anchor="middle" font-size="5" fill="#e8e0d0" font-family="serif" transform="rotate(-8 26.5 28.5)">♠</text>
+    <!-- Person body -->
+    <circle cx="22" cy="8" r="4" fill="#c9a84c" opacity="0.9"/>
+    <rect x="18" y="13" width="8" height="10" rx="3" fill="#c9a84c" opacity="0.75"/>
+    <!-- Arms out (standing pose) -->
+    <line x1="18" y1="16" x2="11" y2="21" stroke="#c9a84c" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+    <line x1="26" y1="16" x2="33" y2="21" stroke="#c9a84c" stroke-width="2.2" stroke-linecap="round" opacity="0.75"/>
+  </svg>`,
+
+  // Crazy Pineapple: 3 cards fanned with a pineapple pip in corner
+  crazy: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Card left -->
+    <rect x="4" y="10" width="20" height="28" rx="2.5" fill="#1a1a28" stroke="#c9a84c" stroke-width="1" transform="rotate(-12 14 24)"/>
+    <text x="8" y="19" font-size="9" fill="#e74c3c" font-family="serif" transform="rotate(-12 14 24)">♥</text>
+    <!-- Card right -->
+    <rect x="20" y="10" width="20" height="28" rx="2.5" fill="#1a1a28" stroke="#c9a84c" stroke-width="1" transform="rotate(12 30 24)"/>
+    <text x="28" y="22" font-size="9" fill="#e8e0d0" font-family="serif" transform="rotate(12 30 24)">♠</text>
+    <!-- Card center -->
+    <rect x="12" y="8" width="20" height="28" rx="2.5" fill="#12121a" stroke="#c9a84c" stroke-width="1.5"/>
+    <!-- Pineapple body -->
+    <ellipse cx="22" cy="26" rx="5" ry="6" fill="#c9a84c" opacity="0.85"/>
+    <!-- Pineapple crown -->
+    <path d="M18 21 Q20 16 22 20 Q24 15 26 21" stroke="#27ae60" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+    <!-- X cross texture -->
+    <line x1="18" y1="24" x2="26" y2="28" stroke="#8a6820" stroke-width="0.8" opacity="0.6"/>
+    <line x1="18" y1="27" x2="26" y2="23" stroke="#8a6820" stroke-width="0.8" opacity="0.6"/>
+  </svg>`,
+
+  // Short Deck: small tight stack of cards with a "6" and lightning bolt (6+ deck)
+  short: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Deck stack shadow cards -->
+    <rect x="9" y="14" width="26" height="20" rx="2.5" fill="#1a1a28" stroke="#7a7060" stroke-width="0.8"/>
+    <rect x="8" y="13" width="26" height="20" rx="2.5" fill="#1a1a28" stroke="#7a7060" stroke-width="0.8"/>
+    <!-- Main top card -->
+    <rect x="7" y="11" width="26" height="22" rx="2.5" fill="#12121a" stroke="#c9a84c" stroke-width="1.5"/>
+    <!-- Lightning bolt (short / fast) -->
+    <path d="M24 13 L19 22 H23 L20 31 L29 20 H25 Z" fill="#c9a84c" opacity="0.9"/>
+    <!-- "6+" label -->
+    <text x="9" y="20" font-size="6.5" fill="#e8e0d0" font-family="serif" font-weight="bold">6+</text>
+  </svg>`,
+
+  // Poker Bingo: a mini 3x3 bingo grid with suits
+  bingo: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Outer card shape -->
+    <rect x="4" y="4" width="36" height="36" rx="4" fill="#12121a" stroke="#c9a84c" stroke-width="1.5"/>
+    <!-- BINGO label -->
+    <text x="22" y="12" text-anchor="middle" font-size="5.5" fill="#c9a84c" font-family="serif" letter-spacing="1">BINGO</text>
+    <!-- Grid 3x3 -->
+    <!-- Row 1 -->
+    <rect x="7" y="14" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="11" y="20.5" text-anchor="middle" font-size="6" fill="#e74c3c" font-family="serif">♥</text>
+    <rect x="18" y="14" width="8" height="8" rx="1" fill="#c9a84c" opacity="0.8"/>
+    <text x="22" y="20.5" text-anchor="middle" font-size="6" fill="#12121a" font-family="serif">♦</text>
+    <rect x="29" y="14" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="33" y="20.5" text-anchor="middle" font-size="6" fill="#e8e0d0" font-family="serif">♠</text>
+    <!-- Row 2 -->
+    <rect x="7" y="24" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="11" y="30.5" text-anchor="middle" font-size="6" fill="#e8e0d0" font-family="serif">♣</text>
+    <rect x="18" y="24" width="8" height="8" rx="1" fill="#c9a84c" opacity="0.8"/>
+    <text x="22" y="30.5" text-anchor="middle" font-size="6" fill="#12121a" font-family="serif">♠</text>
+    <rect x="29" y="24" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="33" y="30.5" text-anchor="middle" font-size="6" fill="#e74c3c" font-family="serif">♥</text>
+    <!-- Row 3 -->
+    <rect x="7" y="34" width="8" height="8" rx="1" fill="#c9a84c" opacity="0.8"/>
+    <text x="11" y="40.5" text-anchor="middle" font-size="6" fill="#12121a" font-family="serif">♦</text>
+    <rect x="18" y="34" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="22" y="40.5" text-anchor="middle" font-size="6" fill="#e8e0d0" font-family="serif">♣</text>
+    <rect x="29" y="34" width="8" height="8" rx="1" fill="#1a1a28" stroke="#c9a84c" stroke-width="0.6"/>
+    <text x="33" y="40.5" text-anchor="middle" font-size="6" fill="#e74c3c" font-family="serif">♥</text>
+  </svg>`,
+
+  // Draft: a hand picking a card from a spread fan (drafting)
+  draft: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fanned cards on table -->
+    <rect x="4" y="20" width="14" height="20" rx="2" fill="#1a1a28" stroke="#7a7060" stroke-width="0.8" transform="rotate(-20 11 30)"/>
+    <rect x="10" y="18" width="14" height="20" rx="2" fill="#1a1a28" stroke="#7a7060" stroke-width="0.8" transform="rotate(-8 17 28)"/>
+    <rect x="18" y="17" width="14" height="20" rx="2" fill="#1a1a28" stroke="#c9a84c" stroke-width="1.2" transform="rotate(5 25 27)"/>
+    <text x="24" y="31" text-anchor="middle" font-size="8" fill="#e74c3c" font-family="serif" transform="rotate(5 25 27)">♥</text>
+    <rect x="26" y="18" width="14" height="20" rx="2" fill="#1a1a28" stroke="#7a7060" stroke-width="0.8" transform="rotate(18 33 28)"/>
+    <!-- Hand / fingers picking the center card -->
+    <path d="M24 17 L22 10 Q22 7 24.5 7 Q27 7 27 10 L25.5 17 Z" fill="#c9a84c" opacity="0.8" stroke="#8a6820" stroke-width="0.5"/>
+    <path d="M27 17.5 L26 11 Q26.5 8 28.5 8.5 Q30.5 9 30 12 L28.5 17.5 Z" fill="#c9a84c" opacity="0.7" stroke="#8a6820" stroke-width="0.5"/>
+    <path d="M21 17.5 L20 12 Q19.5 9 21.5 8.5 Q23.5 8 23 11 L22 17.5 Z" fill="#c9a84c" opacity="0.7" stroke="#8a6820" stroke-width="0.5"/>
+    <!-- Thumb -->
+    <path d="M20 18 Q16 15 17 12 Q18 9 20 11 L21 18 Z" fill="#c9a84c" opacity="0.65" stroke="#8a6820" stroke-width="0.5"/>
+  </svg>`,
+
+  // Red River Holdem: a flowing river wave with cards
+  river: `<svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- River waves -->
+    <path d="M4 28 Q11 22 18 28 Q25 34 32 28 Q38 23 40 26" stroke="#c0392b" stroke-width="2.5" fill="none" stroke-linecap="round" opacity="0.9"/>
+    <path d="M4 33 Q11 27 18 33 Q25 39 32 33 Q38 28 40 31" stroke="#c0392b" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.5"/>
+    <path d="M4 23 Q11 17 18 23 Q25 29 32 23 Q38 18 40 21" stroke="#c0392b" stroke-width="1" fill="none" stroke-linecap="round" opacity="0.3"/>
+    <!-- Two cards floating on river -->
+    <rect x="8" y="10" width="12" height="17" rx="2" fill="#12121a" stroke="#c9a84c" stroke-width="1.2" transform="rotate(-5 14 18)"/>
+    <text x="10" y="21" font-size="8" fill="#e74c3c" font-family="serif" transform="rotate(-5 14 18)">♥</text>
+    <text x="9" y="15" font-size="5" fill="#c9a84c" font-family="serif" transform="rotate(-5 14 18)">A</text>
+    <rect x="24" y="11" width="12" height="17" rx="2" fill="#12121a" stroke="#c9a84c" stroke-width="1.2" transform="rotate(6 30 19)"/>
+    <text x="26" y="22" font-size="8" fill="#e8e0d0" font-family="serif" transform="rotate(6 30 19)">♠</text>
+    <text x="25" y="16" font-size="5" fill="#c9a84c" font-family="serif" transform="rotate(6 30 19)">K</text>
+  </svg>`,
+};
+
+const GAMES = [
+  { id: 'standup', name: 'Stand Up Poker',    svgIcon: ICONS.standup },
+  { id: 'crazy',   name: 'Crazy Pineapple',   svgIcon: ICONS.crazy   },
+  { id: 'short',   name: 'Short Deck',        svgIcon: ICONS.short   },
+  { id: 'bingo',   name: 'Poker Bingo',       svgIcon: ICONS.bingo   },
+  { id: 'draft',   name: 'Draft',             svgIcon: ICONS.draft   },
+  { id: 'river',   name: "Red River Hold'em", svgIcon: ICONS.river   },
+];
+
+let selectedGames = new Set(GAMES.map(g => g.id));
+
+function buildGameList() {
+  const list = document.getElementById('gameList');
+  list.innerHTML = GAMES.map(g => `
+    <div class="game-option ${selectedGames.has(g.id) ? 'active' : ''}" onclick="toggleGame('${g.id}', this)">
+      <div class="game-checkbox"></div>
+      <span style="width:36px;height:36px;flex-shrink:0;display:block">${g.svgIcon}</span>
+      <span class="game-name">${g.name}</span>
+    </div>
+  `).join('');
+}
+
+function toggleGame(id, el) {
+  if (selectedGames.has(id)) {
+    if (selectedGames.size <= 1) return; // keep at least one
+    selectedGames.delete(id);
+    el.classList.remove('active');
+  } else {
+    selectedGames.add(id);
+    el.classList.add('active');
+  }
+}
+
+buildGameList();
+
+// ── CS:GO Case Animation ──
+const ITEM_WIDTH = 130 + 8; // width + gap
+
+function openCase() {
+  const pool = GAMES.filter(g => selectedGames.has(g.id));
+  if (pool.length === 0) return;
+
+  const overlay = document.getElementById('caseOverlay');
+  const track = document.getElementById('caseTrack');
+  const result = document.getElementById('caseResult');
+
+  result.classList.add('hidden');
+  overlay.classList.add('active');
+
+  // Build track: lots of random items + the winner at a specific position
+  const winner = pool[Math.floor(Math.random() * pool.length)];
+
+  // We want ~50 items. Winner lands at position 42 (0-indexed)
+  const TOTAL_ITEMS = 55;
+  const WINNER_INDEX = 42;
+
+  const items = [];
+  for (let i = 0; i < TOTAL_ITEMS; i++) {
+    items.push(pool[Math.floor(Math.random() * pool.length)]);
+  }
+  items[WINNER_INDEX] = winner;
+
+  track.innerHTML = items.map((g, i) => `
+    <div class="case-item" id="ci-${i}">
+      <div class="case-item-icon" style="width:48px;height:48px">${g.svgIcon}</div>
+      <div class="case-item-name">${g.name}</div>
+    </div>
+  `).join('');
+  track.style.transition = 'none';
+  track.style.transform = 'translateX(0)';
+
+  // Center of viewport
+  const wrapperWidth = track.parentElement.offsetWidth;
+  const centerX = wrapperWidth / 2;
+
+  // Winner item center position
+  const winnerCenter = WINNER_INDEX * ITEM_WIDTH + ITEM_WIDTH / 2;
+  const targetX = -(winnerCenter - centerX);
+
+  // Small random offset so it doesn't always land perfectly centered
+  const jitter = (Math.random() - 0.5) * (ITEM_WIDTH * 0.5);
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      track.style.transition = 'transform 4.5s cubic-bezier(0.12, 0.8, 0.2, 1)';
+      track.style.transform = `translateX(${targetX + jitter}px)`;
+    });
+  });
+
+  setTimeout(() => {
+    // Highlight winner
+    document.getElementById(`ci-${WINNER_INDEX}`).classList.add('highlight');
+    document.getElementById('caseResultName').innerHTML =
+      `<span style="display:inline-block;width:36px;height:36px;vertical-align:middle;margin-right:8px">${winner.svgIcon}</span>${winner.name}`;
+    result.classList.remove('hidden');
+  }, 4800);
+}
+
+function closeCase() {
+  document.getElementById('caseOverlay').classList.remove('active');
+}
+
+
+// ══════════════════════════════════════
+// BINGO
+// ══════════════════════════════════════
+const SUITS = [
+  { sym: '♥', name: 'Herz',   red: true  },
+  { sym: '♦', name: 'Karo',   red: true  },
+  { sym: '♠', name: 'Pik',    red: false },
+  { sym: '♣', name: 'Kreuz',  red: false },
+];
+const VALUES = ['2','3','4','5','6','7','8','9','10','Bube','Dame','König','Ass'];
+
+let bingoState = [];
+
+function generateBingo() {
+  document.getElementById('bingoWin').classList.remove('active');
+
+  // Create a shuffled deck
+  const deck = [];
+  SUITS.forEach(s => VALUES.forEach(v => deck.push({ suit: s, value: v })));
+  shuffle(deck);
+
+  bingoState = deck.slice(0, 25).map(c => ({ ...c, checked: false }));
+  renderBingo();
+}
+
+function renderBingo() {
+  const grid = document.getElementById('bingoGrid');
+  grid.innerHTML = bingoState.map((cell, i) => `
+    <div class="bingo-cell ${cell.checked ? 'checked' : ''}" onclick="toggleBingo(${i})">
+      <div class="cell-suit ${cell.suit.red ? 'cell-red' : 'cell-black'}">${cell.suit.sym}</div>
+      <div class="cell-value">${cell.value}</div>
+    </div>
+  `).join('');
+}
+
+function toggleBingo(i) {
+  bingoState[i].checked = !bingoState[i].checked;
+  renderBingo();
+  checkBingoWin();
+}
+
+function checkBingoWin() {
+  const g = bingoState.map(c => c.checked);
+  const lines = [
+    // rows
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    // cols
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    // diagonals
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+  const win = lines.some(line => line.every(idx => g[idx]));
+  document.getElementById('bingoWin').classList.toggle('active', win);
+}
+
+generateBingo(); // generate on load
+
+
+// ══════════════════════════════════════
+// MYSTERY BOUNTY
+// ══════════════════════════════════════
+let bountyMode = 'auto';
+let manualAmounts = [10, 20, 30];
+let envelopes = [];
+
+function setMode(m) {
+  bountyMode = m;
+  document.getElementById('pillAuto').classList.toggle('active', m === 'auto');
+  document.getElementById('pillManual').classList.toggle('active', m === 'manual');
+  document.getElementById('autoMode').classList.toggle('hidden', m !== 'auto');
+  document.getElementById('manualMode').classList.toggle('hidden', m !== 'manual');
+}
+
+function addAmountField(val = '') {
+  manualAmounts.push(val);
+  renderAmountsList();
+}
+
+function renderAmountsList() {
+  const list = document.getElementById('amountsList');
+  list.innerHTML = manualAmounts.map((v, i) => `
+    <div class="mb-amount-item">
+      <input type="number" value="${v}" min="0" placeholder="Betrag €"
+             oninput="manualAmounts[${i}] = parseFloat(this.value) || 0">
+      <button class="mb-amount-remove" onclick="removeAmount(${i})">✕</button>
+    </div>
+  `).join('');
+}
+
+function removeAmount(i) {
+  if (manualAmounts.length <= 1) return;
+  manualAmounts.splice(i, 1);
+  renderAmountsList();
+}
+
+renderAmountsList();
+
+function showError(msg) {
+  const el = document.getElementById('bountyError');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function clearError() {
+  document.getElementById('bountyError').classList.add('hidden');
+}
+
+function distributeAmounts(total, count, minA, maxA) {
+  // Generate random amounts that sum to total, each between min and max
+  if (minA * count > total || maxA * count < total) return null;
+
+  let amounts = Array(count).fill(minA);
+  let remaining = total - minA * count;
+
+  for (let iter = 0; iter < 10000 && remaining > 0; iter++) {
+    const idx = Math.floor(Math.random() * count);
+    const canAdd = Math.min(remaining, maxA - amounts[idx]);
+    if (canAdd <= 0) continue;
+    const add = Math.floor(Math.random() * (canAdd + 1));
+    amounts[idx] += add;
+    remaining -= add;
+  }
+
+  if (remaining > 0) return null;
+  return shuffle([...amounts]);
+}
+
+function startBounty() {
+  clearError();
+  const count = parseInt(document.getElementById('envCount').value);
+  if (!count || count < 2 || count > 24) { showError('Bitte 2–24 Umschläge angeben.'); return; }
+
+  let amounts;
+
+  if (bountyMode === 'auto') {
+    const total = parseFloat(document.getElementById('totalAmount').value);
+    const minA  = parseFloat(document.getElementById('minAmount').value);
+    const maxA  = parseFloat(document.getElementById('maxAmount').value);
+    if (isNaN(total) || total <= 0) { showError('Bitte einen gültigen Gesamtbetrag eingeben.'); return; }
+    if (isNaN(minA) || isNaN(maxA) || minA < 0 || maxA < minA) { showError('Min./Max. Betrag ungültig.'); return; }
+    amounts = distributeAmounts(total, count, minA, maxA);
+    if (!amounts) { showError('Konnte Beträge nicht aufteilen. Bitte Min./Max. anpassen.'); return; }
+  } else {
+    // Manual mode
+    const rawAmounts = [...document.querySelectorAll('#amountsList input')].map(i => parseFloat(i.value));
+    if (rawAmounts.some(isNaN)) { showError('Bitte alle Beträge ausfüllen.'); return; }
+    if (rawAmounts.length < count) { showError(`Bitte genau ${count} Beträge eingeben (aktuell: ${rawAmounts.length}).`); return; }
+    amounts = shuffle(rawAmounts.slice(0, count));
+  }
+
+  envelopes = amounts.map((a, i) => ({ id: i+1, amount: a, opened: false }));
+
+  document.getElementById('bountySetup').classList.add('hidden');
+  document.getElementById('bountyGame').classList.remove('hidden');
+  renderEnvelopes();
+}
+
+function renderEnvelopes() {
+  const grid = document.getElementById('envGrid');
+  const opened = envelopes.filter(e => e.opened).length;
+  const remaining = envelopes.filter(e => !e.opened).reduce((s, e) => s + e.amount, 0);
+
+  document.getElementById('mbOpened').textContent = opened;
+  document.getElementById('mbRemaining').textContent = formatEuro(remaining);
+
+  grid.innerHTML = envelopes.map(e => `
+    <div class="mb-envelope ${e.opened ? 'opened' : ''}" onclick="openEnvelope(${e.id - 1})">
+      <div class="env-icon">${e.opened ? '📭' : '✉️'}</div>
+      ${e.opened
+        ? `<div class="mb-envelope-amount">${formatEuro(e.amount)}</div>`
+        : `<div class="mb-envelope-num">#${e.id}</div>`}
+    </div>
+  `).join('');
+}
+
+function openEnvelope(i) {
+  if (envelopes[i].opened) return;
+  envelopes[i].opened = true;
+
+  // Brief animation
+  const envEls = document.querySelectorAll('.mb-envelope');
+  envEls[i].classList.add('opening');
+  setTimeout(() => {
+    envEls[i].classList.remove('opening');
+    renderEnvelopes();
+    checkAllOpened();
+  }, 500);
+}
+
+function checkAllOpened() {
+  if (envelopes.every(e => e.opened)) {
+    setTimeout(() => {
+      alert('🎉 Alle Umschläge wurden geöffnet! Das Bounty ist vergeben.');
+    }, 300);
+  }
+}
+
+function resetBounty() {
+  envelopes = [];
+  manualAmounts = [10, 20, 30];
+  document.getElementById('bountySetup').classList.remove('hidden');
+  document.getElementById('bountyGame').classList.add('hidden');
+  renderAmountsList();
+}
+
+function formatEuro(n) {
+  return n % 1 === 0 ? `${n}€` : `${n.toFixed(2)}€`;
+}
+
+// ── Utils ──
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+</script>
+</body>
+</html>
